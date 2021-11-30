@@ -28,6 +28,15 @@ pitchStandard = 440.0 -- pitch standard for the note `A`
 semitone :: Semitones -> Hz
 semitone n = pitchStandard * (2 ** (1.0 / 12.0)) ** n
 
+sa  = semitone 0
+re  = semitone 2
+ga  = semitone 4
+ma  = semitone 5
+pa  = semitone 7
+dha = semitone 9
+ni  = semitone 11
+sa' = semitone 12
+
 note :: Semitones -> Seconds -> [Pulse]
 note n duration = freq (semitone n) duration
 
@@ -44,7 +53,7 @@ freq hz duration =
     decaySustain :: [Pulse]
     decaySustain = let
       attackLength = length $ takeWhile (/= 1) attack
-      paddingForAttack = take attackLength $ repeat 1.0
+      paddingForAttack = replicate attackLength 1.0
       in
       concat [paddingForAttack, [1.0, 0.99985 .. 0.5], repeat 0.5]
 
@@ -55,17 +64,19 @@ freq hz duration =
     output = map sin $ map (* step) [0.0 .. sampleRate * duration]
 
 wave :: [Pulse]
-wave = concat [ note 0 duration
-              , note 0 duration
-              , note 0 duration
-              , note 0 duration
-              , note 0 duration
-              , note 0 duration
-              , note 0 duration
-              , note 0 duration
+wave = concat [ freq sa duration
+              , freq re duration
+              , freq ga duration
+              , freq ma duration
+              , freq pa duration
+              , freq dha duration
+              , freq ni duration
+              , freq sa' duration
               ]
   where
     duration = 0.5
+
+
 
 save :: IO ()
 save = B.writeFile outputFilePath $ B.toLazyByteString $ fold $ map B.floatLE wave
