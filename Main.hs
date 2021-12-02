@@ -47,6 +47,9 @@ sa' = semitone 12
 note :: Semitones -> Beats -> [Pulse]
 note n beats = freq (semitone n) beats
 
+freq' :: [Hz] -> Beats -> [Pulse]
+freq' hzs beats = concat $ map (\hz -> freq hz beats) hzs
+
 freq :: Hz -> Beats -> [Pulse]
 freq hz beats =
   map (* volume) $
@@ -74,17 +77,8 @@ freq hz beats =
     output = map sin $ map (* step) [0.0 .. sampleRate * duration]
 
 wave :: [Pulse]
-wave = concat [ freq sa beats
-              , freq re beats
-              , freq ga beats
-              , freq ma beats
-              , freq pa beats
-              , freq dha beats
-              , freq ni beats
-              , freq sa' beats
-              ]
-  where
-    beats = 1
+wave = freq' [sa, re, ga, ma, pa, dha, ni, sa'] beats
+  where beats = 1
 
 save :: IO ()
 save = B.writeFile outputFilePath $ B.toLazyByteString $ fold $ map B.floatLE wave
