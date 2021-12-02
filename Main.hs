@@ -50,6 +50,9 @@ dha = semitone pitchA 9
 ni :: Hz
 ni  = semitone pitchA 11
 
+silence :: Hz
+silence = 0.0
+
 beatDuration :: Seconds
 beatDuration = 60.0 / bpm
 
@@ -88,8 +91,22 @@ freq hz beats =
     output :: [Pulse]
     output = map sin $ map (* step) [0.0 .. sampleRate * duration]
 
+alankar :: [Hz]
+alankar = [ sa, re, ga
+          , silence
+          , re, ga, ma
+          , silence
+          , ga, ma, pa
+          , silence
+          , ma, pa, dha
+          , silence
+          , pa, dha, ni
+          , silence
+          , dha, ni, sa * 2
+          ]
+
 wave :: [Pulse]
-wave = freq' [sa, re, ga, ma, pa, dha, ni, sa * 2] beats
+wave = freq' (alankar ++ [silence] ++ reverse alankar) beats
   where beats = 1
 
 save :: IO ()
