@@ -35,20 +35,20 @@ beatDuration = 60.0 / bpm
 semitone :: Semitones -> Hz
 semitone n = pitchStandard * (2 ** (1.0 / 12.0)) ** n
 
-sa  = note 0
-re  = note 2
-ga  = note 4
-ma  = note 5
-pa  = note 7
-dha = note 9
-ni  = note 11
-sa' = note 12
+sa  = semitone 0
+re  = semitone 2
+ga  = semitone 4
+ma  = semitone 5
+pa  = semitone 7
+dha = semitone 9
+ni  = semitone 11
+sa' = semitone 12
 
 note :: Semitones -> Beats -> [Pulse]
-note n beats = freq (semitone n) (beats * beatDuration)
+note n beats = freq (semitone n) beats
 
-freq :: Hz -> Seconds -> [Pulse]
-freq hz duration =
+freq :: Hz -> Beats -> [Pulse]
+freq hz beats =
   map (* volume) $
     zipWith4 (\w x y z -> w * x * y * z) output attack decaySustain release
   where
@@ -67,18 +67,21 @@ freq hz duration =
     release :: [Pulse]
     release = reverse $ take (length output) attack
 
+    duration :: Seconds
+    duration = beats * beatDuration
+
     output :: [Pulse]
     output = map sin $ map (* step) [0.0 .. sampleRate * duration]
 
 wave :: [Pulse]
-wave = concat [ sa beats
-              , re beats
-              , ga beats
-              , ma beats
-              , pa beats
-              , dha beats
-              , ni beats
-              , sa' beats
+wave = concat [ freq sa beats
+              , freq re beats
+              , freq ga beats
+              , freq ma beats
+              , freq pa beats
+              , freq dha beats
+              , freq ni beats
+              , freq sa' beats
               ]
   where
     beats = 1
