@@ -23,29 +23,41 @@ sampleRate = 48000.0 -- samples per second
 volume :: Float
 volume = 0.2
 
-pitchStandard :: Hz
-pitchStandard = 440.0 -- pitch standard for the note `A`
-
 bpm :: Beats
 bpm = 120.0
+
+pitchA :: Hz
+pitchA = 440.0
+
+sa :: Hz
+sa  = semitone pitchA 0
+
+re :: Hz
+re  = semitone pitchA 2
+
+ga :: Hz
+ga  = semitone pitchA 4
+
+ma :: Hz
+ma  = semitone pitchA 5
+
+pa :: Hz
+pa  = semitone pitchA 7
+
+dha :: Hz
+dha = semitone pitchA 9
+
+ni :: Hz
+ni  = semitone pitchA 11
 
 beatDuration :: Seconds
 beatDuration = 60.0 / bpm
 
-semitone :: Semitones -> Hz
-semitone n = pitchStandard * (2 ** (1.0 / 12.0)) ** n
+semitone :: Hz -> Semitones -> Hz
+semitone pitch n = pitch * (2 ** (1.0 / 12.0)) ** n
 
-sa  = semitone 0
-re  = semitone 2
-ga  = semitone 4
-ma  = semitone 5
-pa  = semitone 7
-dha = semitone 9
-ni  = semitone 11
-sa' = semitone 12
-
-note :: Semitones -> Beats -> [Pulse]
-note n beats = freq (semitone n) beats
+note :: Hz -> Semitones -> Beats -> [Pulse]
+note pitch n beats = freq (semitone pitch n) beats
 
 freq' :: [Hz] -> Beats -> [Pulse]
 freq' hzs beats = concat $ map (\hz -> freq hz beats) hzs
@@ -77,7 +89,7 @@ freq hz beats =
     output = map sin $ map (* step) [0.0 .. sampleRate * duration]
 
 wave :: [Pulse]
-wave = freq' [sa, re, ga, ma, pa, dha, ni, sa'] beats
+wave = freq' [sa, re, ga, ma, pa, dha, ni, sa * 2] beats
   where beats = 1
 
 save :: IO ()
