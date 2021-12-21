@@ -24,7 +24,7 @@ volume :: Float
 volume = 0.2
 
 bpm :: Beats
-bpm = 120.0
+bpm = 240.0
 
 pitchA :: Hz
 pitchA = 440.0
@@ -63,7 +63,7 @@ note :: Hz -> Semitones -> Beats -> [Pulse]
 note pitch n beats = freq (semitone pitch n) beats
 
 freq' :: [Hz] -> Beats -> [Pulse]
-freq' hzs beats = concat $ map (\hz -> freq hz beats) hzs
+freq' hzs beats = concatMap (`freq` beats) hzs
 
 freq :: Hz -> Beats -> [Pulse]
 freq hz beats =
@@ -89,7 +89,7 @@ freq hz beats =
     duration = beats * beatDuration
 
     output :: [Pulse]
-    output = map sin $ map (* step) [0.0 .. sampleRate * duration]
+    output = map (sin . (* step)) [0.0 .. sampleRate * duration]
 
 alankar :: [Hz]
 alankar = [ sa, re, ga
@@ -110,7 +110,7 @@ wave = freq' (alankar ++ [silence] ++ reverse alankar) beats
   where beats = 1
 
 save :: IO ()
-save = B.writeFile outputFilePath $ B.toLazyByteString $ fold $ map B.floatLE wave
+save = B.writeFile outputFilePath . B.toLazyByteString $ foldMap B.floatLE wave
 
 play :: IO ()
 play = do
